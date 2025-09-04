@@ -1,0 +1,51 @@
+on:
+  # allow triggering the workflow manually
+  workflow_dispatch:
+
+  # example schedule -- disabled for public repo
+  # schedule:
+  #   # every day at 10:30 UTC = 3:30AM PDT
+  #   - cron: '30 10 * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install and configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pipenv'
+
+      - name: Install Pipenv
+        run: |
+          pip install pipenv
+
+      - name: Install dependencies from `Pipfile.lock`
+        run: |
+          pipenv sync
+      
+      - name: Choose since/until dates
+        id: sync_dates
+        run:
+          ./sync_dates.py | tee "${GITHUB_OUTPUT}"
+
+      - name: Run sync
+        run: |
+          pipenv run ./kidstuff.py sync copy-posts-in-range \
+              --since=${{ steps.sync_dates.outputs.since }} \
+              --until=${{ steps.sync_dates.outputs.until }}
+        env:
+          TRANSPARENT_CLASSROOM_USERNAME:
+            ${{ secrets.TRANSPARENT_CLASSROOM_USERNAME }}
+          TRANSPARENT_CLASSROOM_PASSWORD:
+            ${{ secrets.TRANSPARENT_CLASSROOM_PASSWORD}}
+          TINYBEANS_USERNAME:
+            ${{ secrets.TINYBEANS_USERNAME }}
+          TINYBEANS_PASSWORD:
+            ${{ secrets.TINYBEANS_PASSWORD }}
+          TINYBEANS_DEFAULT_JOURNAL:
+            ${{ secrets.TINYBEANS_DEFAULT_JOURNAL }}

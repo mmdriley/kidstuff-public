@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+aiohttp = "*"
+ansicolors = "*"
+apischema = "*"
+boto3 = "*"
+click = "*"
+html5lib = "*"
+lxml = "*"
+python-dotenv = "*"
+requests = "*"
+tqdm = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3"
